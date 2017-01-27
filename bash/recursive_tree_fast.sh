@@ -22,6 +22,19 @@ drawStem()
 	done
 }
 
+drawStemLine() 
+{
+	local START_ROW=$1
+	local START_COL=$2
+	local SIZE=$3
+	MATRIX="$@"
+	local LIMIT=$(($START_ROW+$SIZE))
+	for ((rowi=$START_ROW; rowi<$LIMIT; rowi++))
+	do
+		MATRIX[$(getIndex $rowi $START_COL)]=true
+	done
+}
+
 drawBranch() 
 {
 	local START_ROW=$1
@@ -40,6 +53,11 @@ drawBranch()
 		row=$(($START_ROW+$i))
 		MATRIX[$( getIndex $row $COL )]=true
 	done
+}
+
+drawBranchesLine()
+{
+
 }
 
 fillY()
@@ -65,20 +83,21 @@ fillY()
 printMatrix()
 {
 	MATRIX="$@"
-	for ((rowi=$(($NROWS-1)); rowi>=0; rowi--))
+	for ((rowi=0; rowi<$NROWS; rowi++))
 	do
+		local var=""
 		for ((coli=0; coli<$NCOLS; coli++))
 			do
 				local index=$( getIndex $rowi $coli )
 				if [[ ${MATRIX[$index]} = true ]]; then
-					printf "1"
+					#printf "1"
+					#var="${var}1"
 				else
-					printf "_"
+					#var="${var}_"
 				fi
 			done
-			printf "\n"
+			printf "${var}\n"
 	done
-	
 }
 
 declare -a MATRIX
@@ -88,4 +107,5 @@ SIZE=16
 read COUNTER
 
 fillY $START_ROW $START_COL $SIZE $COUNTER ${MATRIX[@]}
+#echo ${MATRIX[*]}
 printMatrix ${MATRIX[@]}
