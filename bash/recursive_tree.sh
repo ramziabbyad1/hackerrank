@@ -49,7 +49,7 @@ fillY()
 	local SIZE=$3
 	local COUNT=$4
 	MATRIX="$@"
-
+	printf "%s\n" "${MATRIX[@]}"
 	drawStem $START_ROW $START_COL $SIZE ${MATRIX[@]}
 	drawBranch $(( $START_ROW + $SIZE )) $(( $START_COL + 1 )) $SIZE "left" ${MATRIX[@]}
 	drawBranch $(( $START_ROW + $SIZE )) $(( $START_COL - 1 )) $SIZE "right" ${MATRIX[@]}
@@ -88,4 +88,4 @@ SIZE=16
 read COUNTER
 
 fillY $START_ROW $START_COL $SIZE $COUNTER ${MATRIX[@]}
-printMatrix ${MATRIX[@]}
+#printMatrix ${MATRIX[@]}

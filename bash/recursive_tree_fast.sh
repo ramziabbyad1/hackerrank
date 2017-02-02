@@ -2,110 +2,59 @@
 NROWS=63
 NCOLS=100
 
-getIndex()
+recursiveTreePrint()
 {
-	I=$1
-	J=$2
-	echo "$(($NCOLS*$I + $J))"
-}
-
-drawStem() 
-{
-	local START_ROW=$1
-	local START_COL=$2
-	local SIZE=$3
-	MATRIX="$@"
-	local LIMIT=$(($START_ROW+$SIZE))
-	for ((rowi=$START_ROW; rowi<$LIMIT; rowi++))
-	do
-		MATRIX[$(getIndex $rowi $START_COL)]=true
-	done
-}
-
-drawStemLine() 
-{
-	local START_ROW=$1
-	local START_COL=$2
-	local SIZE=$3
-	MATRIX="$@"
-	local LIMIT=$(($START_ROW+$SIZE))
-	for ((rowi=$START_ROW; rowi<$LIMIT; rowi++))
-	do
-		MATRIX[$(getIndex $rowi $START_COL)]=true
-	done
-}
-
-drawBranch() 
-{
-	local START_ROW=$1
-	local START_COL=$2
-	local SIZE=$3
-	local LR=$4
-	MATRIX="$@"
-
-	for ((i=0; i<$SIZE; i++ ))
-	do
-		if [[ $LR = 'left' ]]; then
-			let "COL=$START_COL+$i"
-		else
-			let "COL=$START_COL-$i"
-		fi
-		row=$(($START_ROW+$i))
-		MATRIX[$( getIndex $row $COL )]=true
-	done
-}
-
-drawBranchesLine()
-{
-
-}
-
-fillY()
-{
-	local START_ROW=$1
-	local START_COL=$2
-	local SIZE=$3
-	local COUNT=$4
-	MATRIX="$@"
-
-	drawStem $START_ROW $START_COL $SIZE ${MATRIX[@]}
-	drawBranch $(( $START_ROW + $SIZE )) $(( $START_COL + 1 )) $SIZE "left" ${MATRIX[@]}
-	drawBranch $(( $START_ROW + $SIZE )) $(( $START_COL - 1 )) $SIZE "right" ${MATRIX[@]}
-	COUNT=$(($COUNT-1))
-	if [[ $COUNT > 0 ]]
-	then
-		fillY $(( $START_ROW + 2*$SIZE )) $(($START_COL - $SIZE)) $(($SIZE >> 1)) $COUNT ${MATRIX[@]}
-		fillY $(( $START_ROW + 2*$SIZE )) $(($START_COL + $SIZE)) $(($SIZE >> 1)) $COUNT ${MATRIX[@]}
+	colIndex=("$@")
+	local CURR_ROW=${colIndex[0]}
+	local SIZE=${colIndex[1]}
+	local COLINDEX_K=${colIndex[2]}
+	unset colIndex[0]
+	unset colIndex[1]
+	unset colIndex[2]
+	#printf "%s\n" "${colIndex[@]}"
+	#printf "%s\n" "$CURR_ROW"
+	#printf "%s\n" "$SIZE"
+	if [[ $CURR_ROW = $SIZE ]]; then
+		printf "%s\n" 'perform split'
+	else 
+		printRow ${colIndex[@]} $COLINDEX_K $NCOLS
+		recursiveTreePrint $((CURR_ROW+1)) $SIZE $COLINDEX_K ${colIndex[@]}
 	fi
-		
+	
 }
 
-printMatrix()
+printRow()
 {
-	MATRIX="$@"
-	for ((rowi=0; rowi<$NROWS; rowi++))
+	colIndex=("$@")
+	((last_idx=${#colIndex[@]}-1 ))
+	local NCOLS=${colIndex[last_idx]}
+	unset colIndex[last_idx]
+	((last_idx--))
+	local colIndexK=${colIndex[last_idx]}
+	unset colIndex[last_idx]
+
+	for ((coli=0; coli < $NCOLS; coli++ ))
 	do
-		local var=""
-		for ((coli=0; coli<$NCOLS; coli++))
-			do
-				local index=$( getIndex $rowi $coli )
-				if [[ ${MATRIX[$index]} = true ]]; then
-					#printf "1"
-					#var="${var}1"
-				else
-					#var="${var}_"
-				fi
-			done
-			printf "${var}\n"
+		if [[ ${colIndex[$colIndexK]} = $coli ]]; then
+			printf "%i " 1 
+			((colIndexK++))
+		else	
+			printf "%s " '-'
+		fi
 	done
+	printf "\n"
 }
 
-declare -a MATRIX
-START_ROW=0
-START_COL=49
-SIZE=16
-read COUNTER
+declare -a colIndex
+colIndexK=0
+colIndex[$colIndexK]=49
+firstSize=16
+recursiveTreePrint 0 $firstSize $colIndexK ${colIndex[@]}
+#printRow "${colIndex[@]}" "$colIndexK" "$NCOLS" 
 
-fillY $START_ROW $START_COL $SIZE $COUNTER ${MATRIX[@]}
-#echo ${MATRIX[*]}
-printMatrix ${MATRIX[@]}
+#START_ROW=0
+#START_COL=49
+#SIZE=16
+#read COUNTER
+
+#fillY $START_ROW $START_COL $SIZE $COUNTER ${MATRIX[@]}
