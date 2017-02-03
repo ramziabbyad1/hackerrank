@@ -2,6 +2,11 @@
 NROWS=63
 NCOLS=100
 
+updateIndices
+{
+	colIndexOld=("")
+}
+
 recursiveTreePrint()
 {
 	colIndex=("$@")
@@ -16,6 +21,7 @@ recursiveTreePrint()
 	#printf "%s\n" "$SIZE"
 	if [[ $CURR_ROW = $SIZE ]]; then
 		printf "%s\n" 'perform split'
+		updateIndices ${colIndex[@]} ${colIndex[@]} 
 	else 
 		printRow ${colIndex[@]} $COLINDEX_K $NCOLS
 		recursiveTreePrint $((CURR_ROW+1)) $SIZE $COLINDEX_K ${colIndex[@]}
