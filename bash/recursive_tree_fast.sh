@@ -2,65 +2,85 @@
 NROWS=63
 NCOLS=100
 
-updateIndices
+updateIndices()
 {
-	colIndexOld=("")
+	declare -a colIndexNew
+	L=${#colIndex[@]}
+	colIndexNewK=0
+	for ((colIndexK=0; colIndexK < L; colIndexK++))
+	do
+		colIndexNew[$colIndexNewK]=$(( ${colIndex[$colIndexK]} - 1 ))
+		colIndexNew[$colIndexNewK+1]=$(( ${colIndex[$colIndexK]} + 1 ))
+		((colIndexNewK+=2))
+	done
+	colIndex=("${colIndexNew[@]}")
+}
+
+adjustIndices()
+{
+	L=${#colIndex[@]}
+	for ((colIndexK=0; colIndexK < L; colIndexK+=2))
+	do
+		colIndex[$colIndexK]=$(( ${colIndex[$colIndexK]} - 1))
+		colIndex[$colIndexK+1]=$(( ${colIndex[$colIndexK+1]} + 1))
+	done
+
 }
 
 recursiveTreePrint()
 {
-	colIndex=("$@")
-	local CURR_ROW=${colIndex[0]}
-	local SIZE=${colIndex[1]}
-	local COLINDEX_K=${colIndex[2]}
-	unset colIndex[0]
-	unset colIndex[1]
-	unset colIndex[2]
-	#printf "%s\n" "${colIndex[@]}"
-	#printf "%s\n" "$CURR_ROW"
-	#printf "%s\n" "$SIZE"
-	if [[ $CURR_ROW = $SIZE ]]; then
-		printf "%s\n" 'perform split'
-		updateIndices ${colIndex[@]} ${colIndex[@]} 
-	else 
-		printRow ${colIndex[@]} $COLINDEX_K $NCOLS
-		recursiveTreePrint $((CURR_ROW+1)) $SIZE $COLINDEX_K ${colIndex[@]}
+	local CURR_ROW=$1
+	local SIZE=$2
+	local ITER=$3
+	if [[ $CURR_ROW == $(($NROWS - 1)) ]]; then
+		return
 	fi
+	for ((printIndex=0; printIndex < SIZE; printIndex++))
+	do
+		printRow $NCOLS
+	done
+	updateIndices
+	for ((printIndex=0; printIndex < SIZE; printIndex++))
+	do
+		printRow $NCOLS
+		adjustIndices
+	done
+	((SIZE/=2))
+	if [[ $ITER > 1 ]]; then
+		recursiveTreePrint $(($CURR_ROW+1)) $SIZE $(($ITER-1))
+	fi
+	#	updateIndices ${colIndex[@]} 
+	#	printRow ${colIndex[@]} $NCOLS
+	#	recursiveTreePrint $((CURR_ROW+1)) $SIZE $PREVIOUS_SPLIT ${colIndex[@]}
+	
 	
 }
 
 printRow()
 {
-	colIndex=("$@")
-	((last_idx=${#colIndex[@]}-1 ))
-	local NCOLS=${colIndex[last_idx]}
-	unset colIndex[last_idx]
-	((last_idx--))
-	local colIndexK=${colIndex[last_idx]}
-	unset colIndex[last_idx]
-
+	local NCOLS=$1
+	local colIndexK=0
+	#printf "%s\n" ${colIndex[@]}
 	for ((coli=0; coli < $NCOLS; coli++ ))
 	do
-		if [[ ${colIndex[$colIndexK]} = $coli ]]; then
-			printf "%i " 1 
+		if [[ $colIndexK < ${#colIndex[@]} && ${colIndex[$colIndexK]} = $coli  ]]; then
+			printf "%i" 1 
 			((colIndexK++))
 		else	
-			printf "%s " '-'
+			printf "%s" '_'
 		fi
 	done
 	printf "\n"
 }
 
-declare -a colIndex
+declare -ag colIndex
 colIndexK=0
 colIndex[$colIndexK]=49
 firstSize=16
-recursiveTreePrint 0 $firstSize $colIndexK ${colIndex[@]}
-#printRow "${colIndex[@]}" "$colIndexK" "$NCOLS" 
+#printf "before updateIndices\n"
+#printf "%s \n" ${colIndex[@]}
+#updateIndices ${colIndex[@]}
+#printf "after updateIndices\n"
+#printf "%s \n" ${colIndex[@]}
+recursiveTreePrint 0 $firstSize 5
 
-#START_ROW=0
-#START_COL=49
-#SIZE=16
-#read COUNTER
-
-#fillY $START_ROW $START_COL $SIZE $COUNTER ${MATRIX[@]}
