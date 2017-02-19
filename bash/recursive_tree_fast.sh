@@ -49,25 +49,34 @@ recursiveTreePrint()
 	#	return
 	#fi
 	#printf "size = %i\n" $SIZE
+	local ROW_INDEX=$CURR_ROW;
 	for ((printIndex=0; printIndex < SIZE; printIndex++))
 	do
-	#	echo 
 		printRow
+		#echo "CURR_ROW = $ROW_INDEX"
+		((ROW_INDEX++))
 	done
 	updateIndices
-	for ((printIndex=0; printIndex < SIZE; printIndex++))
+	for ((printIndex=0; printIndex < SIZE-1; printIndex++))
 	do
 		printRow
+		#echo "CURR_ROW = $ROW_INDEX"
+		((ROW_INDEX++))
 		adjustIndices
 	done
+	printRow
+	#echo "CURR_ROW = $ROW_INDEX"
+	((ROW_INDEX++))
 	if [[ $ITER > 1 ]]; then
 		((SIZE/=2))
 		recursiveTreePrint $SIZE $(($ITER-1)) $(($CURR_ROW + $SIZE*4))
 	else
 		local colString='____________________________________________________________________________________________________\n'
-		for ((rowi=CURR_ROW; rowi < 63; rowi++ ))
+		for ((rowi=ROW_INDEX; rowi < 63; rowi++ ))
 		do
 			ansString="$colString$ansString"
+			#echo "CURR_ROW = $ROW_INDEX"
+			((ROW_INDEX++))
 		done
 	fi
 	#if [[ $ITER == 1 ]]; then
@@ -119,6 +128,7 @@ printRowOld()
 	printf "\n"
 }
 
+read height
 declare -ag colIndex
 colIndexK=0
 colIndex[0]=49
@@ -143,7 +153,7 @@ firstSize=16
 #printRow
 #printf "after updateIndices\n"
 #printf "%s \n" ${colIndex[@]}
-recursiveTreePrint 16 5 0
+recursiveTreePrint 16 $height 0
 echo -e "$ansString"
 #printRow
 
